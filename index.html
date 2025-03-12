@@ -1,22 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World</title>
+    <title>Login Page</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB33rHMCVJsUNKJeCPXmQGmzly3Oc0XwCo",
+            authDomain: "afro-merch-6b927.firebaseapp.com",
+            projectId: "afro-merch-6b927",
+            storageBucket: "afro-merch-6b927.firebasestorage.app",
+            messagingSenderId: "297612316415",
+            appId: "1:297612316415:web:01a887810bdf89669fc6ca",
+            measurementId: "G-NN9VDDE9QQ"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const loginForm = document.getElementById("login-form");
+            loginForm.addEventListener("submit", (event) => {
+                event.preventDefault();
+                const email = document.getElementById("email").value;
+                const password = document.getElementById("password").value;
+                const errorMessage = document.getElementById("error-message");
+
+                // Reference to Firestore collection and document
+                const credDocRef = doc(db, "printercred", "credentials");
+
+                // Get the document from Firestore
+                getDoc(credDocRef)
+                    .then((docSnapshot) => {
+                        if (docSnapshot.exists()) {
+                            const data = docSnapshot.data();
+                            const storedEmail = data.email;
+                            const storedPassword = data.password;
+
+                            // Check if the credentials match
+                            if (email === storedEmail && password === storedPassword) {
+                                // Save user session in localStorage
+                                localStorage.setItem("isAuthenticated", "true");
+                                localStorage.setItem("userEmail", email);
+                                alert("Login successful!");
+                                window.location.href = "dashboard.html"; // Redirect to dashboard
+                            } else {
+                                errorMessage.textContent = "Invalid email or password.";
+                            }
+                        } else {
+                            errorMessage.textContent = "No credentials found.";
+                        }
+                    })
+                    .catch((error) => {
+                        errorMessage.textContent = "An error occurred. Please try again.";
+                    });
+            });
+        });
+    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 50px;
         }
-        h1 {
-            color: #333;
+
+        .container {
+            max-width: 300px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+        }
+
+        .error {
+            color: red;
         }
     </style>
 </head>
+
 <body>
-    <h1>Hello, World! 👋</h1>
-    <p>Welcome to my GitHub Pagess site.</p>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="login-form">
+            <input type="email" id="email" placeholder="Email" required><br>
+            <input type="password" id="password" placeholder="Password" required><br>
+            <button type="submit">Login</button>
+        </form>
+        <p id="error-message" class="error"></p>
+    </div>
 </body>
+
 </html>
